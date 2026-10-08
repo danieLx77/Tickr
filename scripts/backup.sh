@@ -10,6 +10,6 @@ plain_file="$(mktemp)"
 trap 'rm -f "$plain_file"' EXIT
 pg_dump --format=custom --no-owner --no-acl --dbname="$DATABASE_URL" --file="$plain_file"
 openssl enc -aes-256-cbc -salt -pbkdf2 -iter 250000 -in "$plain_file" -out "$backup_file" -pass env:BACKUP_PASSPHRASE
-sha256sum "$backup_file" > "$backup_file.sha256"
-sha256sum --check "$backup_file.sha256"
+(cd "$BACKUP_OUTPUT_DIR" && sha256sum "$(basename "$backup_file")" > "$(basename "$backup_file").sha256")
+(cd "$BACKUP_OUTPUT_DIR" && sha256sum --check "$(basename "$backup_file").sha256")
 printf 'Backup criptografado criado: %s\n' "$backup_file"
