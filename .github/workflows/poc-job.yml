@@ -17,7 +17,7 @@ jobs:
       group: poc-job
       cancel-in-progress: false
     env:
-      DATABASE_URL: ${{ secrets.POC_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,7 +31,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         shell: bash
         run: |
-          test -n "$DATABASE_URL" || { echo 'POC_DATABASE_URL ausente'; exit 1; }
+          test -n "$DATABASE_URL" || { echo 'DATABASE_URL ausente'; exit 1; }
           if [ "$EVENT_NAME" = 'workflow_dispatch' ]; then
             python backend/job.py --key "$MANUAL_KEY" --scheduled-at "$MANUAL_SCHEDULED_AT"
           else

@@ -7,7 +7,7 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.POC_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
       BACKUP_PASSPHRASE: ${{ secrets.POC_BACKUP_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v4

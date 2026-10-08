@@ -13,6 +13,7 @@ Thumbs.db
 !.env.example
 *.pem
 *.key
+.poc-secrets/
 
 # Arquivos gerados por ferramentas de edição
 .idea/
