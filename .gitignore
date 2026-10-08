@@ -1,0 +1,34 @@
+# Arquivos locais e temporários
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+*.tmp
+*.log
+
+# Configuração local e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Arquivos gerados por ferramentas de edição
+.idea/
+.vscode/
+
+# Instruções do projeto devem ser versionadas
+!AGENTS.md
+.venv/
+node_modules/
+frontend/dist/
+*.dump
+*.dump.enc
+*.sha256
+
+# Saídas locais Python e TypeScript
+__pycache__/
+*.pyc
+.pytest_cache/
+*.tsbuildinfo
