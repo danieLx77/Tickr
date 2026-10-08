@@ -1,0 +1,12 @@
+:root { font-family: system-ui, sans-serif; color: #192831; background: #f4f7f6; }
+body { margin: 0; }
+main { box-sizing: border-box; width: min(100%, 720px); min-height: 100vh; margin: auto; padding: clamp(1.25rem, 5vw, 3rem); }
+h1 { font-size: clamp(2.5rem, 8vw, 4rem); margin: .2em 0; }
+.eyebrow { color: #14644e; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+section { background: white; border: 1px solid #d5e0da; border-radius: 12px; padding: 1rem 1.25rem; margin: 1.5rem 0; overflow-wrap: anywhere; }
+button, input { font: inherit; border-radius: 8px; padding: .7rem .9rem; }
+button { background: #14644e; color: white; border: 0; cursor: pointer; margin: .5rem .5rem .5rem 0; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+label { display: block; margin-bottom: .4rem; font-weight: 600; }
+input { box-sizing: border-box; width: min(100%, 30rem); border: 1px solid #9ab3a9; display: block; }
+.note { color: #52645f; font-size: .9rem; }

@@ -1,0 +1,39 @@
+name: PoC scheduled job
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      logical_key:
+        description: 'Chave lógica sintética para reexecução'
+        required: true
+      scheduled_at:
+        description: 'Horário UTC ISO 8601 da execução lógica'
+        required: true
+jobs:
+  synthetic-job:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: poc-job
+      cancel-in-progress: false
+    env:
+      DATABASE_URL: ${{ secrets.POC_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r backend/requirements.txt
+      - name: Executar e recuperar janelas lógicas
+        env:
+          MANUAL_KEY: ${{ inputs.logical_key }}
+          MANUAL_SCHEDULED_AT: ${{ inputs.scheduled_at }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          test -n "$DATABASE_URL" || { echo 'POC_DATABASE_URL ausente'; exit 1; }
+          if [ "$EVENT_NAME" = 'workflow_dispatch' ]; then
+            python backend/job.py --key "$MANUAL_KEY" --scheduled-at "$MANUAL_SCHEDULED_AT"
+          else
+            python backend/job.py --recover-hours 3
+          fi

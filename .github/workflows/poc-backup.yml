@@ -1,0 +1,22 @@
+name: PoC encrypted backup
+on:
+  schedule:
+    - cron: '37 3 * * *'
+  workflow_dispatch:
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.POC_DATABASE_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.POC_BACKUP_PASSPHRASE }}
+      BACKUP_OUTPUT_DIR: ${{ runner.temp }}/tickr-backups
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          test -n "$DATABASE_URL" && test -n "$BACKUP_PASSPHRASE"
+          bash scripts/backup.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-poc-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/tickr-backups/*.enc*
+          retention-days: 90
