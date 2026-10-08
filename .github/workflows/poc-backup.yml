@@ -13,7 +13,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           test -n "$DATABASE_URL" && test -n "$BACKUP_PASSPHRASE"
-          bash scripts/backup.sh
+          mkdir -p "$BACKUP_OUTPUT_DIR"
+          docker run --rm \
+            -e DATABASE_URL -e BACKUP_PASSPHRASE \
+            -e BACKUP_OUTPUT_DIR=/backup \
+            -v "$BACKUP_OUTPUT_DIR:/backup" \
+            -v "$GITHUB_WORKSPACE/scripts:/scripts:ro" \
+            postgres:18 bash /scripts/backup.sh
         env:
           BACKUP_OUTPUT_DIR: ${{ runner.temp }}/tickr-backups
       - uses: actions/upload-artifact@v4
