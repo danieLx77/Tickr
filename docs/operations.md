@@ -1,6 +1,6 @@
 # Operações planejadas
 
-São procedimentos para fases futuras; nenhum provedor, backup ou job está configurado. A [Fase 00](implementation-plan.md) valida operação totalmente gratuita, remota e independente do computador pessoal.
+São procedimentos para fases futuras. A [Fase 00](poc/README.md) configurou provedores, job manual e backup sintético; ainda avalia cron real, retenção e custo permanente.
 
 ## Agenda e recuperação
 
@@ -24,4 +24,4 @@ Procedimento de incidente: identificar último dado/backup válido e escopo, sus
 
 ## Evidência operacional da Fase 00
 
-O [registro da PoC](poc/test-results.md) distingue backup/restauração locais de operação remota; rotinas de produção e retenção continuam pendentes.
+O [registro da PoC](poc/test-results.md) documenta backup remoto e restauração isolada; rotinas de produção e retenção continuam pendentes.

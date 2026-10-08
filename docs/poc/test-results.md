@@ -1,40 +1,32 @@
 # Resultados e matriz de validação
 
-**Atualizado em 08/10/2026.** “Local” significa nesta máquina; não comprova hospedagem ou plano gratuito remoto. Testes usaram somente registros sintéticos. Nenhuma execução agendada real, envio de e-mail ou upload externo foi observada.
+**Atualizado em 08/10/2026.** Somente dados sintéticos foram usados. “Aprovado” refere-se ao teste indicado, não à aprovação geral da PoC.
 
 | Componente | Estado | Evidência e limitação |
 | --- | --- | --- |
-| Frontend remoto HTTPS | **Pendente** | `npm run build` passou localmente; sem projeto Vercel/URL remota. |
-| Backend FastAPI remoto | **Pendente** | TestClient e servidor Uvicorn local passaram; sem Vercel. |
-| Comunicação frontend–backend remota | **Pendente** | Interface preparada para `VITE_API_URL`, sem teste remoto. |
-| PostgreSQL persistente | **Aprovado com restrições** | Docker local: escrita/leitura e `synthetic|1` após reinício; Projeto Neon Free criado, mas conexão e persistência remotas não testadas. |
-| Commit e rollback | **Aprovado com restrições** | Teste local confirmou escrita e ausência do marcador `rollback_probe`; não executado em Neon. |
-| Escrita não autorizada bloqueada | **Aprovado com restrições** | API local respondeu 401 sem token em TestClient e HTTP real; autenticação simplificada, não final. |
-| Agendamento automático real | **Pendente** | Workflow preparado; nenhum disparo `schedule` observado. Execução manual não o substituirá. |
-| Job idempotente/recuperação | **Aprovado com restrições** | Local: duas janelas ausentes inseridas, reexecução retornou `inserted: False` para ambas; recuperação limitada a 24 horas. |
-| E-mail real autorizado | **Pendente** | Sem conta Resend e sem destinatário autorizado. |
-| Backup criptografado externo | **Pendente** | Dump local criptografado com AES-256-CBC/PBKDF2 e checksum validado; não enviado a destino externo. |
-| Restauração isolada | **Aprovado com restrições** | Dump local restaurado em PostgreSQL 17 isolado; consulta deu `synthetic|1`. Não testado em ambiente remoto. |
-| Segredos protegidos e HTTPS | **Pendente** | Código evita segredos no Git e protege escrita; HTTPS remoto e configuração de segredos não testados. |
-| Custo R$ 0 integral | **Pendente** | Cotas oficiais pesquisadas, nenhuma conta/projeto remoto medido. |
-| Operação sem computador pessoal | **Pendente** | Jobs, API e banco só testados localmente. |
+| Frontend remoto HTTPS | **Aprovado** | [Página pública](https://frontend-rust-one-50.vercel.app/) abriu; build Vite passou. Em 390 px não houve rolagem horizontal. |
+| Backend FastAPI remoto | **Aprovado** | [Health check](https://backend-lake-one-89.vercel.app/health) retornou 200 e fase 00. |
+| Comunicação frontend–backend | **Aprovado** | Navegador exibiu API/banco conectados e leu `demo` do Neon; preflight CORS da origem exata retornou 200. |
+| PostgreSQL persistente | **Aprovado com restrições** | Neon Free: escrita HTTPS 201, leitura 200 e dados presentes depois de novo deploy da API. Teste de suspensão prolongada/limite de CU-h ainda pendente. |
+| Commit e rollback | **Aprovado** | Escrita `demo` persistiu; `/transaction-check` remoto retornou `rollback_ok: true`. |
+| Escrita não autorizada bloqueada | **Aprovado com restrições** | POST sem token retornou 401. Token temporário da PoC não é autenticação final. |
+| Agendamento automático real | **Pendente** | Nenhum evento `schedule` observado. O primeiro `workflow_dispatch` [passou](https://github.com/danieLx77/Tickr/actions/runs/37803072113), mas não substitui cron real. |
+| Job idempotente/recuperação | **Aprovado com restrições** | [Primeiro run](https://github.com/danieLx77/Tickr/actions/runs/37803072113): `inserted: True`, planejado 15:00 UTC, efetivo 15:43:31 UTC por disparo manual. [Reexecução](https://github.com/danieLx77/Tickr/actions/runs/37803453232): `False`; Neon mostrou contagem 1. Recuperação de duas janelas passou localmente, ainda não em um `schedule` real. |
+| E-mail real autorizado | **Aprovado com restrições** | [Resend](https://resend.com/emails/01a11c38-33da-796a-81eb-adbcd4a8b44b) registrou `Sent` e `Delivered` para o endereço GitHub autorizado. Chave com `Sending access` em GitHub Secret. `resend.dev` é domínio de teste; uso contínuo em produção sem domínio próprio permanece pendente. |
+| Backup criptografado externo | **Aprovado com restrições** | [Actions 37803587635](https://github.com/danieLx77/Tickr/actions/runs/37803587635) publicou `.dump.enc` e `.sha256`; download e SHA-256 passaram. Retenção de 90 dias, capacidade e rotação 7/4/3 não comprovadas. |
+| Restauração isolada | **Aprovado** | Artefato baixado foi descriptografado e restaurado em PostgreSQL 18 local isolado. `demo`, `synthetic`, job e restrições de chave/check foram verificados. Nenhuma restauração sobre Neon principal. |
+| Segredos protegidos e HTTPS | **Aprovado com restrições** | HTTPS nas duas URLs; Vercel Secret para `DATABASE_URL`/token, GitHub Secrets para conexão/chave. Repositório público contém só código e dados sintéticos; a chave de backup precisa de cópia segura pelo proprietário. |
+| Custo R$ 0 integral | **Pendente** | Contas Hobby/Free sem contratação paga nos testes; medição continuada e viabilidade do e-mail/retenção incompletas. |
+| Operação sem computador pessoal | **Aprovado com restrições** | Frontend, API, PostgreSQL, job e backup executam na nuvem. Cron e e-mail permanecem sem prova completa. |
 
-## Verificações locais executadas
+## Execuções e falhas observadas
 
-- Instalação das dependências Python e Node; `npm install` relatou 0 vulnerabilidades entre 22 pacotes auditados naquele momento.
-- `ruff check backend` e `ruff format --check backend`: passaram.
-- `pytest -q backend/tests` com PostgreSQL Docker local: **4 testes passaram** na execução final (1 aviso de depreciação do TestClient).
-- `npm run build`: passou, Vite gerou `dist/`.
-- Uvicorn local iniciou e respondeu HTTP 200 para `/health`, `/db` e `/records/demo`; `POST /records` sem token respondeu 401.
-- `scripts/backup.sh`: gerou arquivo criptografado e checksum local.
-- Primeira restauração no PostgreSQL 16 falhou porque o `pg_dump`/`pg_restore` do host são versão 17 e o dump contém `transaction_timeout` desconhecido no servidor 16. Restauração em PostgreSQL 17 isolado passou, inclusive com a versão final do script transacional. Isso demonstra necessidade de compatibilidade de versões no procedimento remoto.
-- Reinício do PostgreSQL local preservou o registro e o job (`synthetic|1`).
-- `backend/job.py --recover-hours 2` inseriu dois horários lógicos; reexecução das mesmas janelas não inseriu duplicatas.
+- CI [37803575716](https://github.com/danieLx77/Tickr/actions/runs/37803575716) passou. Localmente: Ruff, build Vite, quatro testes Python com PostgreSQL Docker, health/leitura/escrita/rollback HTTP e recuperação de duas janelas passaram.
+- O primeiro [backup remoto](https://github.com/danieLx77/Tickr/actions/runs/37803119638) falhou porque o Neon usa PostgreSQL 18 e o runner tinha `pg_dump` 16. O workflow agora usa a imagem oficial `postgres:18`; [run corrigido](https://github.com/danieLx77/Tickr/actions/runs/37803587635) passou.
+- A primeira tentativa de repetir o job [falhou](https://github.com/danieLx77/Tickr/actions/runs/37803163650) com `UndefinedTable: poc_job_runs`. Consulta imediata ao Neon encontrou a tabela, e a repetição seguinte passou sem duplicar. Causa ainda não confirmada; monitorar antes de aprovar confiabilidade do agendamento.
+- O checksum inicial continha caminho absoluto do container, o que impedia sua verificação após download. O script foi corrigido para nome relativo; o artefato novo passou SHA-256 fora do runner.
+- Sem `DATABASE_URL`, a API local respondeu 503 sem vazar credenciais; sem token, 401. Não foram simuladas indisponibilidade prolongada do Neon, falha de envio, atraso real do agendador ou saturação de cotas.
 
-## Falhas simuladas e não simuladas
+## Como verificar o cron depois
 
-`DATABASE_URL` ausente produziu 503 sem expor a variável. Acesso sem token produziu 401. Não foram simuladas indisponibilidade real do Neon, falha de e-mail, atraso do agendador, falha de upload externo nem saturação de cotas. O teste local de `TestClient` precisou rodar fora do sandbox por restrição do ambiente; isso não é evidência remota.
-
-## Pendências de observação remota
-
-Depois de configurar os serviços com autorização: registrar URL HTTPS e horários, executar leitura/escrita/reinício em Neon, rodar workflow manual e aguardar um `schedule` real, comparar horários planejado/efetivo, repetir job, verificar consumo, enviar mensagem sintética ao destinatário autorizado, baixar o artefato criptografado e restaurá-lo em banco remoto isolado. Registrar links de execuções e IDs não sensíveis. Não deixar uma sessão aberta indefinidamente aguardando cron.
+No [histórico do job](https://github.com/danieLx77/Tickr/actions/workflows/poc-job.yml), procurar um run com `event: schedule` (não `workflow_dispatch` ou `push`), conferir conclusão e log de `scheduled_at`, `executed_at` e `inserted`. Confirmar a linha `poc-hourly-AAAAMMDDHH` no Neon e reexecutar manualmente a mesma chave para verificar ausência de duplicata. O cron está em `17 * * * *` UTC, sujeito a atraso ou perda conforme documentação do GitHub. Não manter esta sessão aberta apenas para esperar o horário.

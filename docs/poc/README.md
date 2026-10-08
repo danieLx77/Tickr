@@ -1,15 +1,25 @@
 # Fase 00 — PoC de infraestrutura gratuita
 
-**Estado em 08/10/2026: pendente.** Há protótipo mínimo React/TypeScript, API FastAPI, PostgreSQL local sintético, job idempotente e mecanismo local de backup criptografado/restauração. Contas gratuitas Vercel Hobby e Neon Free foram acessadas; o projeto Neon `tickr-poc` foi criado em São Paulo. Não houve implantação remota, conexão com Neon, conta Resend, envio real de e-mail, execução agendada observada nem backup armazenado externamente. Portanto, a exigência de operação integralmente remota por R$ 0 **não foi comprovada**.
+**Estado em 08/10/2026: pendente.** A interface, a API e o banco sintético funcionam remotamente por HTTPS; o job manual e o backup criptografado foram executados no GitHub Actions, um artefato baixado foi restaurado em PostgreSQL 18 isolado, e um e-mail sintético foi entregue. Ainda falta observar um disparo **real** de `schedule`, resolver o envio permanente sem domínio pago e comprovar a política completa de retenção e custo R$ 0 em uso continuado. A Fase 01 permanece bloqueada.
 
-## Arquitetura efetivamente testada
+## Serviços implantados
 
-Frontend gerado localmente com Vite; backend FastAPI testado localmente; PostgreSQL 16 local via Docker Compose para API/job e PostgreSQL 17 isolado para restauração do dump gerado por `pg_dump` 17. Dados são exclusivamente sintéticos. A API tem health check, conexão com banco, leitura, escrita com token temporário e transação com rollback. O job grava horários lógicos idempotentes e recupera até 24 janelas recentes. A autenticação da PoC é apenas demonstração de bloqueio de escrita; Argon2id, TOTP e sessões revogáveis são da Fase 02.
+| Serviço | Endereço / projeto | Evidência |
+| --- | --- | --- |
+| Interface React/TypeScript | [Tickr PoC](https://frontend-rust-one-50.vercel.app/) — Vercel Hobby | HTTPS, build de produção, leitura de `demo` e estados da API/banco no navegador; largura móvel de 390 px sem rolagem horizontal. |
+| API FastAPI | [Health check](https://backend-lake-one-89.vercel.app/health) — Vercel Hobby | `/health`, `/db`, leitura e escrita autenticada, 401 sem token e rollback testados por HTTPS. |
+| PostgreSQL | [Neon `tickr-poc`](https://console.neon.tech/app/projects/twilight-poetry-23702290) — Free, São Paulo | Duas tabelas e registros sintéticos; API e Actions acessaram via TLS. Leitura persistiu após novo deploy da API. |
+| Job | [Execução inicial](https://github.com/danieLx77/Tickr/actions/runs/37803072113), [reexecução](https://github.com/danieLx77/Tickr/actions/runs/37803453232) | O primeiro gravou `inserted: True`; o segundo, `False`. Consulta Neon mostrou uma única linha para a chave lógica. Ambos foram manuais. |
+| Backup | [Execução com artefato](https://github.com/danieLx77/Tickr/actions/runs/37803587635) | Dump criptografado e checksum armazenados no GitHub; download, SHA-256 e restauração isolada testados. Artefato expira em 90 dias. |
+| E-mail | [Resend: mensagem de teste](https://resend.com/emails/01a11c38-33da-796a-81eb-adbcd4a8b44b) | `Sent` e `Delivered` para o endereço GitHub autorizado, usando `onboarding@resend.dev`. Esse domínio serve para teste; produção exige solução verificada. |
 
-## Caminho remoto proposto, ainda sem autorização/credenciais
+Dados são exclusivamente sintéticos. A autenticação por token demonstra bloqueio de escrita, mas não substitui Argon2id, TOTP, sessões revogáveis e regras de acesso da Fase 02. Os projetos Vercel estão na equipe Hobby `tickr4`; o repositório GitHub é público. Segredos estão nas variáveis Secret da Vercel e nos Secrets do GitHub Actions, fora do Git. A frase de recuperação do backup também está no arquivo local ignorado `.poc-secrets/backup-passphrase`; o proprietário deve guardar uma cópia segura independente do computador.
 
-Dois projetos Vercel a partir do monorepo, com raízes `frontend/` e `backend/`; variáveis `VITE_API_URL`, `DATABASE_URL`, `POC_WRITE_TOKEN` e `POC_CORS_ORIGINS` configuradas diretamente nos serviços. Neon como PostgreSQL; GitHub Actions para CI, job e backup criptografado; Resend em avaliação. Nenhum desses componentes remotos foi testado ou aprovado. Segredos nunca devem ser enviados pelo chat nem inseridos em arquivos versionados. Publicar serviços exige autorização apropriada.
+## Pendências essenciais
 
-## Bloqueios e próximos passos
+1. Observar pelo menos um evento `schedule` real do job às `HH:17` UTC e registrar horário efetivo e persistência no Neon. A execução manual não aprova o agendador. O GitHub pode atrasar ou perder eventos; o job recupera até três janelas recentes na execução agendada.
+2. Demonstrar envio contínuo permitido em produção sem compra de domínio. O Resend entregou um teste ao próprio usuário, mas recomenda domínio verificado para produção; avaliar alternativa gratuita compatível.
+3. Validar a retenção 7 diários/4 semanais/3 mensais e o consumo de armazenamento. Artefatos Actions são independentes do Neon, mas expiram em 90 dias e somem com a exclusão do repositório/workflow.
+4. Medir cotas após operação representativa; a ausência de cobrança nos testes de hoje não garante R$ 0 de forma permanente.
 
-As contas Vercel/Neon e a reconexão do GitHub CLI foram autorizadas e criadas/concluídas. Para completar a PoC: conectar o banco Neon ao backend sem expor segredos, publicar frontend/API gratuitos, configurar variáveis nos painéis, executar testes HTTPS, observar cron real, receber um endereço de e-mail autorizado e testar envio, guardar backup criptografado em destino externo e restaurá-lo em banco remoto isolado. Confirmar ausência de cobrança automática e termos antes de cada serviço. Ver [provedores](providers-evaluation.md), [consumo](cost-estimate.md), [resultados](test-results.md) e [recuperação](recovery-procedures.md). A Fase 01 permanece bloqueada.
+Ver [provedores](providers-evaluation.md), [consumo](cost-estimate.md), [resultados](test-results.md) e [recuperação](recovery-procedures.md). Não iniciar a Fase 01 enquanto a matriz mantiver requisitos essenciais pendentes.

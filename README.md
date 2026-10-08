@@ -2,7 +2,7 @@
 
 Tickr é uma aplicação web pessoal para acompanhar uma carteira de ações da B3, proventos e oportunidades segundo os critérios de Décio Bazin. Serve a um único administrador, em português brasileiro. BESST (Bancos, Energia, Saneamento, Seguros e Telecomunicações) organiza análises; ações de outros setores também são acompanhadas. Indicadores, cores e ranking não constituem recomendação de investimento.
 
-**Estado:** Fase 00 em execução, com protótipo e testes locais. A infraestrutura remota e o custo R$ 0 ainda não foram validados; a PoC está pendente e antecede a implementação funcional.
+**Estado:** Fase 00 com protótipo remoto funcional em Vercel/Neon, job manual, e-mail de teste entregue e backup restaurado. A PoC segue **pendente** por cron real, envio permanente sem domínio pago, retenção e custo R$ 0 em operação continuada; a implementação funcional aguarda esses critérios.
 
 ## Escopo e arquitetura planejados
 
@@ -12,7 +12,7 @@ A stack escolhida para a aplicação é React/TypeScript, Python/FastAPI, Postgr
 
 ## Desenvolvimento local
 
-A PoC local usa Python 3.12+, Node.js 22, npm e Docker Compose. Com PostgreSQL iniciado por `docker compose up -d`, instale dependências em um ambiente virtual com `pip install -r backend/requirements-dev.txt`; execute `pytest -q backend/tests` com `POC_TEST_DATABASE_URL` apontando ao banco sintético local. Para a interface, use `npm ci` e `npm run build` em `frontend/`. Configure `DATABASE_URL`, `POC_DB_SSLMODE=disable` apenas no banco local, `POC_WRITE_TOKEN` e `POC_CORS_ORIGINS` fora do Git. Os exemplos ficam em `backend/.env.example` e `frontend/.env.example`. A implantação remota permanece pendente; veja [resultados da PoC](docs/poc/README.md).
+A PoC local usa Python 3.12+, Node.js 22, npm e Docker Compose. Com PostgreSQL iniciado por `docker compose up -d`, instale dependências em um ambiente virtual com `pip install -r backend/requirements-dev.txt`; execute `pytest -q backend/tests` com `POC_TEST_DATABASE_URL` apontando ao banco sintético local. Para a interface, use `npm ci` e `npm run build` em `frontend/`. Configure `DATABASE_URL`, `POC_DB_SSLMODE=disable` apenas no banco local, `POC_WRITE_TOKEN` e `POC_CORS_ORIGINS` fora do Git. Os exemplos ficam em `backend/.env.example` e `frontend/.env.example`. Veja os [resultados remotos da PoC](docs/poc/README.md).
 
 ## Documentação
 
