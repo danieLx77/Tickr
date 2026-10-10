@@ -18,7 +18,7 @@ Dados são exclusivamente sintéticos. A autenticação por token demonstra bloq
 ## Pendências essenciais
 
 1. Validar remotamente a recuperação por lacunas persistidas após um disparo real. Os testes locais passaram; o GitHub ainda pode atrasar ou perder eventos, e a execução processa no máximo 24 pendências por vez.
-2. Demonstrar envio contínuo permitido em produção sem compra de domínio. O Resend entregou um teste ao próprio usuário, mas recomenda domínio verificado para produção; avaliar alternativa gratuita compatível.
+2. Demonstrar envio contínuo sem compra de domínio. Gmail API parece viável para uso pessoal, mas depende de conta Gmail do titular, projeto Google Cloud com Gmail API ativa, OAuth External **In production**, escopo mínimo `gmail.send`, consentimento `offline` e refresh token protegido. **Testing** exige novo consentimento após sete dias. Não foram criadas credenciais nem enviado e-mail pela Gmail API; ver [avaliação](providers-evaluation.md).
 3. Definir e validar a retenção 7 diários/4 semanais/3 mensais e o consumo de armazenamento. O workflow atual guarda todos os dumps por 90 dias, sem seleção 7/4/3; artefatos somem com a exclusão do repositório/workflow.
 4. Medir cotas após operação representativa; a ausência de cobrança nos testes de hoje não garante R$ 0 de forma permanente.
 
