@@ -2,11 +2,11 @@
 
 import argparse
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import psycopg
 
-FIRST_SCHEDULED_AT = datetime(2026, 10, 8, 21, 17, tzinfo=timezone.utc)
+FIRST_SCHEDULED_AT = datetime(2026, 10, 8, 21, 17, tzinfo=UTC)
 
 
 def run(logical_key: str, scheduled_at: datetime) -> bool:
@@ -34,8 +34,8 @@ def run(logical_key: str, scheduled_at: datetime) -> bool:
 
 
 def latest_slot(now: datetime) -> datetime:
-    latest = now.astimezone(timezone.utc).replace(minute=17, second=0, microsecond=0)
-    if latest > now.astimezone(timezone.utc):
+    latest = now.astimezone(UTC).replace(minute=17, second=0, microsecond=0)
+    if latest > now.astimezone(UTC):
         latest -= timedelta(hours=1)
     return latest
 
@@ -96,7 +96,7 @@ def recover(now: datetime, limit: int, start: datetime = FIRST_SCHEDULED_AT) -> 
             {
                 "logical_key": key,
                 "scheduled_at": slot.isoformat(),
-                "executed_at": datetime.now(timezone.utc).isoformat(),
+                "executed_at": datetime.now(UTC).isoformat(),
                 "inserted": inserted,
             },
             flush=True,
@@ -117,11 +117,11 @@ if __name__ == "__main__":
     if args.recover:
         if args.recover_limit < 1:
             parser.error("recover-limit deve ser positivo")
-        recover(datetime.now(timezone.utc), args.recover_limit)
+        recover(datetime.now(UTC), args.recover_limit)
     else:
         if not args.scheduled_at:
             parser.error("scheduled-at é obrigatório com --key")
-        scheduled_at = datetime.fromisoformat(args.scheduled_at.replace("Z", "+00:00"))
+        scheduled_at = datetime.fromisoformat(args.scheduled_at)
         if scheduled_at.tzinfo is None:
             parser.error("scheduled-at precisa de fuso horário")
         inserted = run(args.key, scheduled_at)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             {
                 "logical_key": args.key,
                 "scheduled_at": scheduled_at.isoformat(),
-                "executed_at": datetime.now(timezone.utc).isoformat(),
+                "executed_at": datetime.now(UTC).isoformat(),
                 "inserted": inserted,
             }
         )

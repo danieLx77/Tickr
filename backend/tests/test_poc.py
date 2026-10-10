@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import psycopg
@@ -51,7 +51,7 @@ def test_database_read_write_transaction_and_job(monkeypatch):
     assert client.post(
         "/transaction-check", headers={"Authorization": "Bearer synthetic-local-secret"}
     ).json() == {"rollback_ok": True}
-    scheduled = datetime(2026, 10, 8, 12, 0, tzinfo=timezone.utc)
+    scheduled = datetime(2026, 10, 8, 12, 0, tzinfo=UTC)
     assert run("test-logical-key", scheduled) is True
     assert run("test-logical-key", scheduled) is False
     with psycopg.connect(url, sslmode="disable") as conn, conn.cursor() as cur:
@@ -64,6 +64,6 @@ def test_database_read_write_transaction_and_job(monkeypatch):
 
 
 def test_latest_scheduled_slot():
-    assert latest_slot(datetime(2026, 10, 8, 13, 5, tzinfo=timezone.utc)) == datetime(
-        2026, 10, 8, 12, 17, tzinfo=timezone.utc
+    assert latest_slot(datetime(2026, 10, 8, 13, 5, tzinfo=UTC)) == datetime(
+        2026, 10, 8, 12, 17, tzinfo=UTC
     )

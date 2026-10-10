@@ -1,6 +1,6 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import psycopg
@@ -8,7 +8,7 @@ import pytest
 
 from backend import job
 
-START = datetime(2030, 1, 1, 21, 17, tzinfo=timezone.utc)
+START = datetime(2030, 1, 1, 21, 17, tzinfo=UTC)
 
 
 def test_recover_seven_hour_gap_and_repeat(monkeypatch, capsys):
@@ -77,12 +77,12 @@ def test_failure_does_not_complete_failed_or_later_slots(monkeypatch, capsys):
 
 
 def test_utc_day_change(monkeypatch):
-    start = datetime(2030, 1, 1, 23, 17, tzinfo=timezone.utc)
+    start = datetime(2030, 1, 1, 23, 17, tzinfo=UTC)
     monkeypatch.setattr(job, "completed_slots", lambda first, end: set())
     assert job.pending_slots(start + timedelta(hours=2), start) == [
         start,
-        datetime(2030, 1, 2, 0, 17, tzinfo=timezone.utc),
-        datetime(2030, 1, 2, 1, 17, tzinfo=timezone.utc),
+        datetime(2030, 1, 2, 0, 17, tzinfo=UTC),
+        datetime(2030, 1, 2, 1, 17, tzinfo=UTC),
     ]
 
 
@@ -93,7 +93,7 @@ def test_database_gap_and_concurrent_execution(monkeypatch):
     url = os.environ["POC_TEST_DATABASE_URL"]
     monkeypatch.setenv("DATABASE_URL", url)
     monkeypatch.setenv("POC_DB_SSLMODE", "disable")
-    start = datetime(2031, 1, 1, 21, 17, tzinfo=timezone.utc)
+    start = datetime(2031, 1, 1, 21, 17, tzinfo=UTC)
     end = start + timedelta(hours=2)
     with psycopg.connect(url, sslmode="disable") as conn, conn.cursor() as cur:
         cur.execute(Path("backend/schema.sql").read_text(encoding="utf-8"))
