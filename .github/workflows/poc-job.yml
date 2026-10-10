@@ -35,5 +35,5 @@ jobs:
           if [ "$EVENT_NAME" = 'workflow_dispatch' ]; then
             python backend/job.py --key "$MANUAL_KEY" --scheduled-at "$MANUAL_SCHEDULED_AT"
           else
-            python backend/job.py --recover-hours 3
+            python backend/job.py --recover --recover-limit 24
           fi

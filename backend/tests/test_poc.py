@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
-from backend.job import expected_slots, run
+from backend.job import latest_slot, run
 
 client = TestClient(app)
 
@@ -63,10 +63,7 @@ def test_database_read_write_transaction_and_job(monkeypatch):
         assert cur.fetchone()[0] == 0
 
 
-def test_expected_slots_for_recovery():
-    slots = expected_slots(datetime(2026, 10, 8, 13, 5, tzinfo=timezone.utc), 3)
-    assert [slot.isoformat() for slot in slots] == [
-        "2026-10-08T10:17:00+00:00",
-        "2026-10-08T11:17:00+00:00",
-        "2026-10-08T12:17:00+00:00",
-    ]
+def test_latest_scheduled_slot():
+    assert latest_slot(datetime(2026, 10, 8, 13, 5, tzinfo=timezone.utc)) == datetime(
+        2026, 10, 8, 12, 17, tzinfo=timezone.utc
+    )
